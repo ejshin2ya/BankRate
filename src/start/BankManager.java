@@ -9,6 +9,9 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 
 public class BankManager implements IBankManager {
 	private static BankManager instance = new BankManager();
@@ -26,6 +29,7 @@ public class BankManager implements IBankManager {
 	@Override
 	public void add(Bank b) {
 		bankList.add(b);
+		save();
 	}
 	@Override
 	public List<Bank> getList() {
@@ -72,8 +76,10 @@ public class BankManager implements IBankManager {
 		return ssList;
 	}
     public void save() {
-        try( ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("bank.dat"))){
-            os.writeObject(this.bankList);
+    	Gson gson = new Gson();
+    	String result = gson.toJson(this.bankList);
+        try( ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("data/bank.json"))){
+            os.writeObject(result);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -83,8 +89,9 @@ public class BankManager implements IBankManager {
         }
     }
     public void load() {
-        try(ObjectInputStream is = new ObjectInputStream(new FileInputStream("bank.dat"))){
-            this.bankList = (List<Bank>) is.readObject();
+    	Gson gson = new Gson();
+        try(ObjectInputStream is = new ObjectInputStream(new FileInputStream("data/bank.json"))){
+            this.bankList = gson.fromJson((String)is.readObject(), new TypeToken<List<Bank>>() {}.getType());
         } catch (Exception e) {
 //            e.printStackTrace();
             this.bankList = new ArrayList<Bank>();
